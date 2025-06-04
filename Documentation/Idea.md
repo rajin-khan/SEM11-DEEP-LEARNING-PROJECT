@@ -16,6 +16,8 @@
 
 > Current computer vision models require massive datasets and extensive training for each new task or domain. This research investigates a novel paradigm: **Can we create a multimodal vision system that learns continuously from minimal examples while self-assessing its readiness for deployment through reinforcement learning from human feedback?**
 
+*Primary Inspiration: ["Learning Transferable Visual Models From Natural Language Supervision"](https://arxiv.org/abs/2103.00020) - Demonstrates efficient learning of visual representations from 400M image-text pairs, enabling zero-shot transfer to diverse computer vision tasks.*
+
 </div>
 
 ## Core Research Questions

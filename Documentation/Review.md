@@ -39,6 +39,7 @@
 
 **Few-Shot Learning**: 
 - [Lin et al. (2024): "Few-shot Adaptation of Multi-modal Foundation Models: A Survey"](https://arxiv.org/abs/2401.01736) - Shows multimodal models replacing traditional approaches
+- [Radford et al. (2021): "Learning Transferable Visual Models From Natural Language Supervision"](https://arxiv.org/abs/2103.00020) - Demonstrates efficient learning of visual representations from 400M image-text pairs, enabling zero-shot transfer to diverse computer vision tasks
 - [Finn et al. (2017): "Model-Agnostic Meta-Learning" (MAML)](https://arxiv.org/abs/1703.03400) - Foundation of gradient-based meta-learning
 - [Snell et al. (2017): "Prototypical Networks for Few-shot Learning"](https://arxiv.org/abs/1703.05175) - Metric learning for few-shot classification
 
