@@ -559,10 +559,6 @@ def get_confidence_interval(data, confidence=0.95):
 
 ---
 
-
-
----
-
 ## Future Extensions & Research Directions
 
 ### Immediate Extensions (3-6 months)
