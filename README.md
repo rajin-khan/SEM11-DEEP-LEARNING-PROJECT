@@ -1,1 +1,1 @@
-FLASH: Few-shot Learning with Adaptive Smart Human feedback
+CALM : Continual Adaptive Learning Model
