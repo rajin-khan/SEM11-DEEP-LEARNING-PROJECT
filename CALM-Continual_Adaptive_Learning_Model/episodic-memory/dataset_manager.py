@@ -4,27 +4,44 @@ from torchvision.datasets import CIFAR100, CIFAR10
 from torchvision import transforms
 from torch.utils.data import Subset
 
+# --- NEW: Configuration Dictionary ---
+# This dictionary holds the default settings for each dataset.
+# It makes the manager self-aware and easy to extend.
+DATASET_CONFIGS = {
+    'cifar100': {
+        'default_tasks': 10
+    },
+    'cifar10': {
+        'default_tasks': 5  # A more sensible default for 10 classes (5 tasks of 2 classes each)
+    }
+}
+
+
 class DatasetManager:
     """
     A unified interface to handle various datasets for continual learning experiments.
-    
-    This class abstracts away the details of loading and splitting datasets,
-    allowing the main training loop to be dataset-agnostic.
+    This class now knows the best default settings for each dataset.
     """
-    def __init__(self, dataset_name, num_tasks, k_shot):
+    def __init__(self, dataset_name, num_tasks=None, k_shot=5): # num_tasks default is now None
         """
         Initializes the manager and loads the specified dataset.
-        
-        Args:
-            dataset_name (str): The name of the dataset to use (e.g., 'cifar100', 'cifar10').
-            num_tasks (int): The number of sequential tasks to split the dataset into.
-            k_shot (int): The number of examples per class to use for the support set.
-                         (Note: This argument is not used by the manager itself but is
-                          kept for a consistent interface with the main script's args).
+        If num_tasks is not provided, it will use the sensible default for that dataset.
         """
         self.dataset_name = dataset_name.lower()
-        self.num_tasks = num_tasks
-        self.k_shot = k_shot # Not used here, but good practice to keep track of it
+        if self.dataset_name not in DATASET_CONFIGS:
+            raise ValueError(f"Dataset '{self.dataset_name}' is not supported.")
+        
+        # --- MODIFIED: Smart Task Handling ---
+        # If the user does not specify a number of tasks, use our smart default.
+        if num_tasks is None:
+            self.num_tasks = DATASET_CONFIGS[self.dataset_name]['default_tasks']
+            print(f"No --num_tasks specified. Using smart default of {self.num_tasks} for {self.dataset_name}.")
+        else:
+            # If the user provides a value, it overrides the default.
+            self.num_tasks = num_tasks
+            print(f"User override: Using {self.num_tasks} tasks.")
+        
+        self.k_shot = k_shot
         
         self.train_dataset = None
         self.test_dataset = None
@@ -33,7 +50,8 @@ class DatasetManager:
         
         self._load_dataset()
         print(f"DatasetManager initialized for '{self.dataset_name}' with {self.num_tasks} tasks.")
-
+    
+    # ... The rest of the file remains exactly the same ...
     def _load_dataset(self):
         """Internal method to load the correct dataset based on the name."""
         transform = transforms.ToTensor()
@@ -56,43 +74,19 @@ class DatasetManager:
         self.class_names = self.train_dataset.classes
 
     def get_task_datasets(self, dataset_type, task_id):
-        """
-        Gets a subset of the data corresponding to a specific task.
-        
-        Args:
-            dataset_type (str): 'train' or 'test'.
-            task_id (int): The ID of the task (from 0 to num_tasks-1).
-            
-        Returns:
-            A torch.utils.data.Subset object.
-        """
         dataset = self.train_dataset if dataset_type == 'train' else self.test_dataset
-        
         start_class = task_id * self.classes_per_task
         end_class = (task_id + 1) * self.classes_per_task
-        
-        # This works because dataset.targets is a standard attribute in torchvision datasets
         indices = [i for i, target in enumerate(dataset.targets) if start_class <= target < end_class]
         return Subset(dataset, indices)
         
     def get_class_range_for_task(self, task_id):
-        """Returns the start and end class ID for a given task."""
         start_class = task_id * self.classes_per_task
         end_class = (task_id + 1) * self.classes_per_task
         return range(start_class, end_class)
 
     def get_class_names_for_task(self, task_id):
-        """
-        Returns the list of class name strings for a given task.
-        
-        Args:
-            task_id (int): The ID of the task (from 0 to num_tasks-1).
-        
-        Returns:
-            A list of strings with the class names for that task.
-        """
         if not self.class_names:
              raise RuntimeError("Class names have not been loaded. Call _load_dataset first.")
-
         class_range = self.get_class_range_for_task(task_id)
         return [self.class_names[i] for i in class_range]

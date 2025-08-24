@@ -1,7 +1,9 @@
 # File: run_continual_learning.py (Refactored for Comparison)
+# run command: python run_continual_learning.py --dataset <dataset_name>
 
 import torch
 import torch.nn.functional as F
+from torchvision import transforms
 from torch.utils.data import DataLoader
 from transformers import CLIPProcessor, CLIPModel
 from tqdm import tqdm
@@ -33,31 +35,29 @@ def evaluate_zero_shot_continual(model, processor, data_manager, device):
     model.eval()
     task_accuracies = []
     
+    # --- FIX 1: Create prompts for ALL classes, not just task-specific ones ---
+    all_class_names = data_manager.class_names
+    text_prompts = [f"a photo of a {c}" for c in all_class_names]
+    text_inputs = processor(text=text_prompts, return_tensors="pt", padding=True).to(device)
+
     for task_id in range(data_manager.num_tasks):
         test_loader = DataLoader(data_manager.get_task_datasets('test', task_id), batch_size=128)
-        class_names = data_manager.get_class_names_for_task(task_id)
-        text_prompts = [f"a photo of a {c}" for c in class_names]
         
         correct = 0
         total = 0
         with torch.no_grad():
-            text_inputs = processor(text=text_prompts, return_tensors="pt", padding=True).to(device)
-            
             for images, labels in test_loader:
-                pil_images = [torch.transforms.ToPILImage()(img) for img in images]
+                pil_images = [transforms.ToPILImage()(img) for img in images]
                 image_inputs = processor(images=pil_images, return_tensors="pt").to(device)
                 
                 outputs = model(**image_inputs, **text_inputs)
                 logits_per_image = outputs.logits_per_image
                 
-                # The prediction indices are local to the task (0 to classes_per_task-1)
-                preds_local = torch.argmax(logits_per_image, dim=1)
+                # The predictions are now global indices (0-9), matching the original labels
+                preds_global = torch.argmax(logits_per_image, dim=1)
                 
-                # Convert global labels to local labels for comparison
-                start_class = task_id * data_manager.classes_per_task
-                labels_local = labels.to(device) - start_class
-                
-                correct += (preds_local == labels_local).sum().item()
+                # --- FIX 2: Compare directly with original labels. No local conversion needed. ---
+                correct += (preds_global == labels.to(device)).sum().item()
                 total += len(labels)
         
         task_acc = (correct / total) * 100
@@ -86,7 +86,7 @@ def run_continual_task_sequence(model, processor, data_manager, k_shot, device):
             
             for idx in support_indices:
                 image, label = train_subset[idx]
-                pil_image = torch.transforms.ToPILImage()(image)
+                pil_image = transforms.ToPILImage()(image)
                 with torch.no_grad():
                     image_input = processor(images=pil_image, return_tensors="pt").to(device)
                     embedding = model.get_image_features(**image_input).squeeze()
@@ -121,10 +121,11 @@ def evaluate_on_memory_prototypical(memory, model, processor, test_loader, devic
     total = 0
     with torch.no_grad():
         for images, labels in test_loader:
-            pil_images = [torch.transforms.ToPILImage()(img) for img in images]
+            # This line correctly converts the BATCH of images to PIL images
+            pil_images = [transforms.ToPILImage()(img) for img in images] 
+            
             image_inputs = processor(images=pil_images, return_tensors="pt").to(device)
             query_embeddings = model.get_image_features(**image_inputs)
-            query_embeddings = F.normalize(query_embeddings, p=2, dim=1)
             
             similarities = query_embeddings @ prototypes.T
             preds_indices = torch.argmax(similarities, dim=1)
