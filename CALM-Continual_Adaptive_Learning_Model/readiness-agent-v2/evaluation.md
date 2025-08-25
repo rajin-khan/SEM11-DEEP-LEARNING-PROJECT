@@ -219,17 +219,47 @@ python evaluate_agent_improved.py --k_shot 10
 Main experimental results for your research:
 
 ```bash
-# Memory size analysis (CIFAR-10)
+# Memory size analysis (all datasets)
 python evaluate_agent_improved.py --k_shot 1 --dataset cifar10
 python evaluate_agent_improved.py --k_shot 5 --dataset cifar10  
 python evaluate_agent_improved.py --k_shot 10 --dataset cifar10
 python evaluate_agent_improved.py --k_shot 20 --dataset cifar10
 
+python evaluate_agent_improved.py --k_shot 1 --dataset fashionmnist
+python evaluate_agent_improved.py --k_shot 5 --dataset fashionmnist  
+python evaluate_agent_improved.py --k_shot 10 --dataset fashionmnist
+python evaluate_agent_improved.py --k_shot 20 --dataset fashionmnist
+
+python evaluate_agent_improved.py --k_shot 1 --dataset stl10
+python evaluate_agent_improved.py --k_shot 5 --dataset stl10  
+python evaluate_agent_improved.py --k_shot 10 --dataset stl10
+python evaluate_agent_improved.py --k_shot 20 --dataset stl10
+
 # Calibration method comparison (5-shot)
+
 python evaluate_agent_improved.py --k_shot 5 --calibration_method temperature
+
+python evaluate_agent_improved.py --k_shot 5 --dataset cifar10 --calibration_method temperature
+python evaluate_agent_improved.py --k_shot 5 --dataset fashionmnist --calibration_method temperature
+python evaluate_agent_improved.py --k_shot 5 --dataset stl10 --calibration_method temperature
+
 python evaluate_agent_improved.py --k_shot 5 --calibration_method isotonic
+
+python evaluate_agent_improved.py --k_shot 5 --dataset cifar10 --calibration_method isotonic
+python evaluate_agent_improved.py --k_shot 5 --dataset fashionmnist --calibration_method isotonic
+python evaluate_agent_improved.py --k_shot 5 --dataset stl10 --calibration_method isotonic
+
 python evaluate_agent_improved.py --k_shot 5 --calibration_method platt
+
+python evaluate_agent_improved.py --k_shot 5 --dataset cifar10 --calibration_method platt
+python evaluate_agent_improved.py --k_shot 5 --dataset fashionmnist --calibration_method platt
+python evaluate_agent_improved.py --k_shot 5 --dataset stl10 --calibration_method platt
+
 python evaluate_agent_improved.py --k_shot 5 --calibration_method none
+
+python evaluate_agent_improved.py --k_shot 5 --dataset cifar10 --calibration_method none
+python evaluate_agent_improved.py --k_shot 5 --dataset fashionmnist --calibration_method none
+python evaluate_agent_improved.py --k_shot 5 --dataset stl10 --calibration_method none
 
 # Cross-dataset validation
 python evaluate_agent_improved.py --dataset cifar10 --k_shot 5
