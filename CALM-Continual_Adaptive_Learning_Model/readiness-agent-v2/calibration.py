@@ -1,4 +1,4 @@
-# File: calibration.py (IMPROVED VERSION)
+# File: calibration.py (FIXED VERSION - MPS Compatible)
 # Enhanced calibration with debugging and multiple calibration methods
 
 import torch
@@ -57,19 +57,21 @@ class CalibratedModel(nn.Module):
         elif self.calibration_method == "isotonic":
             probabilities = torch.softmax(logits, dim=1)
             max_probs, _ = torch.max(probabilities, dim=1)
-            max_probs_np = max_probs.detach().cpu().numpy()
+            max_probs_np = max_probs.detach().cpu().numpy().astype(np.float64)  # Explicit float64 conversion
             if self.isotonic_calibrator is not None:
                 calibrated_confidences = self.isotonic_calibrator.predict(max_probs_np)
-                return torch.tensor(calibrated_confidences, device=self.device)
+                return torch.tensor(calibrated_confidences, device=self.device, dtype=torch.float32)
             return max_probs
         
         elif self.calibration_method == "platt":
             probabilities = torch.softmax(logits, dim=1)
             max_probs, _ = torch.max(probabilities, dim=1)
-            max_probs_np = max_probs.detach().cpu().numpy().reshape(-1, 1)
+            # Convert to CPU first, then to numpy with explicit float64 dtype
+            max_probs_np = max_probs.detach().cpu().numpy().astype(np.float64).reshape(-1, 1)
             if self.platt_calibrator is not None:
                 calibrated_probs = self.platt_calibrator.predict_proba(max_probs_np)[:, 1]
-                return torch.tensor(calibrated_probs, device=self.device)
+                # Convert back to float32 tensor for MPS compatibility
+                return torch.tensor(calibrated_probs, device=self.device, dtype=torch.float32)
             return max_probs
         
         else:  # No calibration
@@ -251,8 +253,9 @@ class CalibratedModel(nn.Module):
         probs = torch.softmax(all_logits, dim=1)
         max_probs, _ = torch.max(probs, dim=1)
         
-        max_probs_np = max_probs.detach().cpu().numpy()
-        correct_np = all_correct.cpu().numpy()
+        # Convert to CPU and ensure float64 for sklearn compatibility
+        max_probs_np = max_probs.detach().cpu().numpy().astype(np.float64)
+        correct_np = all_correct.cpu().numpy().astype(np.float64)
         
         self.isotonic_calibrator = IsotonicRegression(out_of_bounds='clip')
         self.isotonic_calibrator.fit(max_probs_np, correct_np)
@@ -260,12 +263,13 @@ class CalibratedModel(nn.Module):
         print("Isotonic calibration completed.")
 
     def _calibrate_platt(self, all_logits, all_correct):
-        """Calibrate using Platt Scaling (Logistic Regression)."""
+        """Calibrate using Platt Scaling (Logistic Regression) - MPS Compatible."""
         probs = torch.softmax(all_logits, dim=1)
         max_probs, _ = torch.max(probs, dim=1)
         
-        max_probs_np = max_probs.detach().cpu().numpy().reshape(-1, 1)
-        correct_np = all_correct.cpu().numpy()
+        # Convert to CPU first, then to numpy with explicit float64 dtype for sklearn
+        max_probs_np = max_probs.detach().cpu().numpy().astype(np.float64).reshape(-1, 1)
+        correct_np = all_correct.cpu().numpy().astype(np.int32)  # Use int32 for labels
         
         self.platt_calibrator = LogisticRegression()
         self.platt_calibrator.fit(max_probs_np, correct_np)
