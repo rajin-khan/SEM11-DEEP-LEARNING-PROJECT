@@ -1,7 +1,7 @@
 # File: run_imagenet_evaluation.py
 # The final script to evaluate the few-shot performance of the CALM framework on ImageNet.
-#run command: python run_imagenet_evaluation.py --imagenet_root /path/to/your/datasets/imagenet --k_shot 5 --n_way 5
-
+# MODIFIED: Corrected the image transformation pipeline to work with the CLIPProcessor.
+# run command: python run_imagenet_evaluation.py --imagenet_root D:\Datasets\imagenet_torchvision --k_shot 5 --n_way 5
 import torch
 import torch.nn.functional as F
 from torchvision import transforms
@@ -39,6 +39,7 @@ def run_single_episode(support_set, query_set, model, processor, device, batch_s
     memory = EpisodicMemory()
 
     # --- 1. Build Memory from Support Set ---
+    # The support_set now contains PIL Images, which is what the processor expects.
     support_images = [item[0] for item in support_set]
     support_labels = [item[1] for item in support_set]
     
@@ -90,12 +91,12 @@ def main():
     processor = CLIPProcessor.from_pretrained("openai/clip-vit-base-patch32")
 
     # --- 2. Load and Prepare ImageNet Data ---
-    # CLIP's vision transformer was trained on 224x224 images.
+    # --- THIS IS THE FIX ---
+    # The CLIP processor handles ToTensor and Normalize internally.
+    # We only need to resize and crop the images, leaving them as PIL Images.
     transform = transforms.Compose([
         transforms.Resize(256),
         transforms.CenterCrop(224),
-        transforms.ToTensor(),
-        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
     ])
     
     sampler = ImageNetSampler(root_path=args.imagenet_root, split='val', transform=transform)
