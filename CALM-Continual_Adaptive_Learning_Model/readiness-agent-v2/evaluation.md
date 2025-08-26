@@ -225,6 +225,7 @@ python evaluate_agent_improved.py --k_shot 5 --dataset cifar10 (done)
 python evaluate_agent_improved.py --k_shot 10 --dataset cifar10 (done)
 python evaluate_agent_improved.py --k_shot 20 --dataset cifar10 (done)
 
+
 python evaluate_agent_improved.py --k_shot 1 --dataset fashionmnist (done)
 python evaluate_agent_improved.py --k_shot 5 --dataset fashionmnist (done)
 python evaluate_agent_improved.py --k_shot 10 --dataset fashionmnist (done)
@@ -235,6 +236,11 @@ python evaluate_agent_improved.py --k_shot 5 --dataset stl10 (done)
 python evaluate_agent_improved.py --k_shot 10 --dataset stl10 (done)
 python evaluate_agent_improved.py --k_shot 20 --dataset stl10 (done)
 
+python evaluate_agent_improved.py --k_shot 1 --dataset cifar100 (done)
+python evaluate_agent_improved.py --k_shot 5 --dataset cifar100 (done)
+python evaluate_agent_improved.py --k_shot 10 --dataset cifar100 (done)
+python evaluate_agent_improved.py --k_shot 20 --dataset cifar100 (done)
+
 # Calibration method comparison (5-shot)
 
 python evaluate_agent_improved.py --k_shot 5 --calibration_method temperature
@@ -242,24 +248,28 @@ python evaluate_agent_improved.py --k_shot 5 --calibration_method temperature
 python evaluate_agent_improved.py --k_shot 5 --dataset cifar10 --calibration_method temperature (done)
 python evaluate_agent_improved.py --k_shot 5 --dataset fashionmnist --calibration_method temperature (done)
 python evaluate_agent_improved.py --k_shot 5 --dataset stl10 --calibration_method temperature (done)
+python evaluate_agent_improved.py --k_shot 5 --dataset cifar100 --calibration_method temperature (done)
 
 python evaluate_agent_improved.py --k_shot 5 --calibration_method isotonic
 
 python evaluate_agent_improved.py --k_shot 5 --dataset cifar10 --calibration_method isotonic (done)
 python evaluate_agent_improved.py --k_shot 5 --dataset fashionmnist --calibration_method isotonic (done)
 python evaluate_agent_improved.py --k_shot 5 --dataset stl10 --calibration_method isotonic (done)
+python evaluate_agent_improved.py --k_shot 5 --dataset cifar100 --calibration_method isotonic (done)
 
 python evaluate_agent_improved.py --k_shot 5 --calibration_method platt
 
 python evaluate_agent_improved.py --k_shot 5 --dataset cifar10 --calibration_method platt (done)
 python evaluate_agent_improved.py --k_shot 5 --dataset fashionmnist --calibration_method platt (done)
 python evaluate_agent_improved.py --k_shot 5 --dataset stl10 --calibration_method platt (done)
+python evaluate_agent_improved.py --k_shot 5 --dataset cifar100 --calibration_method platt (done)
 
 python evaluate_agent_improved.py --k_shot 5 --calibration_method none
 
 python evaluate_agent_improved.py --k_shot 5 --dataset cifar10 --calibration_method none (done)
 python evaluate_agent_improved.py --k_shot 5 --dataset fashionmnist --calibration_method none (done)
 python evaluate_agent_improved.py --k_shot 5 --dataset stl10 --calibration_method none (done)
+python evaluate_agent_improved.py --k_shot 5 --dataset cifar100 --calibration_method none (done)
 
 ```
 
